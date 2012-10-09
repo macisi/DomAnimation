@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+    ul, li { margin: 0; padding: 0;}
+    .menu { margin: 0 auto; width: 90%; height: 32px; background-color: #39eeff; border: 1px solid #000;}
+    li { position: relative; float: left; width: 80px; height: 32px; text-align: center; line-height: 32px;}
+    li ul { position: absolute; top: 33px; left: 0; background-color: #71ffc8;}
+    li li { float: none;}
+    </style>
+    <script src="lib/modernizr.js"></script>
+    <script src="lib/underscore.js"></script>
+</head>
+<body>
+<div id="Js_nav">
+    <ul class="menu">
+        <li data-role="parent">
+            <a href="#">aaa</a>
+            <ul data-role="sub">
+                <li><a href="#">111</a></li>
+                <li><a href="#">222</a></li>
+                <li><a href="#">333</a></li>
+            </ul>
+        </li>
+        <li><a href="#">bbb</a></li>
+        <li data-role="parent">
+            <a href="#">ccc</a>
+            <ul data-role="sub">
+                <li><a href="#">111</a></li>
+                <li><a href="#">222</a></li>
+                <li><a href="#">333</a></li>
+                <li><a href="#">444</a></li>
+            </ul>
+        </li>
+        <li><a href="#">ddd</a></li>
+    </ul>
+</div>
+<script src="lib/develop.js"></script>
+<script>
+var nav = new bg.Menu("Js_nav", {
+    animate: "slide"
+});
+</script>
+</body>
+</html>

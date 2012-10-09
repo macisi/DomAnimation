@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+    dl, dt, dd, ul, li { margin: 0; padding: 0;}
+    li { list-style: none;}
+    .zoomer { position: relative;}
+    .zoomer dt { width: 250px; height: 250px; border: 1px solid #000; overflow: hidden;}
+    .zoomer dd {}
+    .zoomer dd li { float: left;}
+    </style>
+    <script src="lib/modernizr.js"></script>
+    <script src="lib/underscore.js"></script>
+</head>
+<body>
+12312 <br>  <br>
+<dl id="Js_zoomer" class="zoomer">
+    <dt>
+        <img src="http://www.33ly.com/File/img_scene/2008527121256103.jpg" width="250" height="250" alt="">
+    </dt>
+    <dd>
+        <ul>
+            <li><img src="http://www.33ly.com/File/img_scene/2008527121256103.jpg" alt="" width="72" height="72" data-large="http://www.33ly.com/File/img_scene/2008527121256103.jpg" data-larger="http://www.33ly.com/File/img_scene/2008527121256103.jpg"></li>
+            <li><img src="http://img.51766.com/shdmhk/1312339364083.jpg" alt="" width="72" height="72"></li>
+            <li><img src="http://annepalijs.punt.nl/upload/very-cute-puppy.jpg" alt="" width="72" height="72" data-large="http://annepalijs.punt.nl/upload/very-cute-puppy.jpg"></li>
+            <li><img src="http://www.puppyopvoeden.nl/wp-content/uploads/2011/05/berner-senner-puppy.jpg" alt="" width="72" height="72" data-large="http://www.puppyopvoeden.nl/wp-content/uploads/2011/05/berner-senner-puppy.jpg"></li>
+        </ul>
+    </dd>
+</dl>
+<script src="lib/develop.js"></script>
+<script>
+new bg.Zoomer("Js_zoomer", {
+
+});
+</script>
+</body>
+</html>

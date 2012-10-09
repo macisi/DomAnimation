@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+    .cur { color: #4ba3ff;}
+    </style>
+    <script src="lib/modernizr.js"></script>
+    <script src="lib/underscore.js"></script>
+</head>
+<body>
+    <div id="Js_tab">
+        <div class="tab_head">
+            <span data-role="tab">tab1</span>
+            <span data-role="tab">tab2</span>
+            <span data-role="tab">tab3</span>
+            <span data-role="tab">tab4</span>
+        </div>
+        <div class="tab_cont">
+            <div data-role="content">content1</div>
+            <div data-role="content">content2</div>
+            <div data-role="content">content3</div>
+            <div data-role="content">content4</div>
+        </div>
+    </div>
+<script src="lib/develop.js"></script>
+<script>
+var tab1 = new bg.Tabs("Js_tab", {
+    event: "mouseover"
+});
+tab1.init();
+</script>
+</body>
+</html>
