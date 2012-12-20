@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <title>metro</title>
 <style type="text/css">
-.group { width: 300px; display: -webkit-box; -webkit-box-orient: horizontal; display: -moz-box; -moz-box-orient: horizontal; display: box; box-orient: horizontal;}
-.box { margin: 5px; padding: 5px; width: 100px; height: 100px; background-color: #81d0e9; border: 2px solid #f00;}
+.group { float: left; width: 300px;}
+.waiting .box { -moz-transform: scale(0.8, 0.8); -webkit-transform: scale(0.8, 0.8); }
+.box { float: left; margin: 5px; padding: 5px; width: 100px; height: 100px; background-color: #81d0e9; border: 2px solid #f00; transition: all 0.5s ease;}
 </style>
 </head>
 <body>
@@ -17,9 +18,18 @@
     <div draggable="true" class="box">555555555555</div>
     <div draggable="true" class="box">666666666666</div>
 </div>
+<div class="group">
+    <div draggable="true" class="box">111111111111</div>
+    <div draggable="true" class="box">222222222222</div>
+    <div draggable="true" class="box">333333333333</div>
+    <div draggable="true" class="box">444444444444</div>
+    <div draggable="true" class="box">555555555555</div>
+    <div draggable="true" class="box">666666666666</div>
+</div>
 <script>
 (function(){
     var box = document.querySelectorAll(".box");
+    var group = document.querySelectorAll(".group");
     var content, origin;
 
     document.addEventListener("dragstart", handles, false);
@@ -36,7 +46,9 @@
                 origin = e.target;
                 e.dataTransfer.effectAllowed = "all";
                 e.dataTransfer.setData("text/html", content);
-//                console.log(e.dataTransfer);
+                [].forEach.call(group, function(obj){
+                    obj.className = "group waiting";
+                });
                 break;
             case "dragenter":
                 console.log(e);
@@ -50,6 +62,9 @@
                 e.preventDefault();
                 origin.outerHTML = e.target.outerHTML;
                 e.target.outerHTML = e.dataTransfer.getData("text/html");
+                [].forEach.call(group, function(obj){
+                    obj.className = "group";
+                });
                 break;
         }
     }
