@@ -49,26 +49,16 @@ Dom = (function(d){
 
 Metro = (function(d){
     var groups = [],
-        gridHeight = 120;
+        gridHeight = 120,
+        gridWidth = 120,
+        gridMargin = 8;
 
 
     function _Group(i){
         var index = i || 0;
         this.grids = [];
-        /**
-         * 设置group的index
-         * @param i
-         */
-        this.setIndex = function(i) {
-            index = i;
-        };
-        /**
-         * 返回当前group的index
-         * @return {*}
-         */
-        this.getIndex = function(){
-            return index;
-        };
+        this.mapping = null;
+        this.index = i
     }
     _Group.prototype = {
         /**
@@ -87,28 +77,18 @@ Metro = (function(d){
             return this.grids.splice(i, 1);
         }
     };
-    function _Grid(i){
-        var index = i || 0;
-        /**
-         * 设置grid的index
-         * @param i
-         */
-        this.setIndex = function(i) {
-            index = i;
-        };
-        /**
-         * 返回当前grid的index
-         * @return {*}
-         */
-        this.getIndex = function(){
-            return index;
-        };
+    function _Grid(grid){
+        this.mapping = grid;
+        this.size = +grid.dataset.size;
     }
     _Grid.prototype = {
         init: function(){
-
+        },
+        // 设置grid的index和data-index
+        setIndex: function(i){
+            this.index = i;
+            this.mapping.dataset.index = i;
         }
-
     };
 
 
@@ -116,49 +96,32 @@ Metro = (function(d){
     function layout(){
         var _group = Dom.getAll(".group"),
             each = Array.prototype.forEach,
-            temp,
-            size,
-            lastSize,
-            level;
+            temp_group,
+            temp_grid;
 
         //初始化页面中的group加入groups中
         each.call(_group, function(gr, index){
-            temp = new _Group(index);
-            lastSize = 0;
-            level = 0;
+            gr.dataset.index = index;
+            temp_group = new _Group(index);
+            temp_group.mapping = gr;
             //为group添加grid
             each.call(Dom.getAll(gr, ".grid"), function(g, i){
-                size = +g.dataset.size;
-                if (size === 2 && lastSize === 0) {
-                    g.style.top = level * gridHeight + (level - 1) * 8 + "px";
-                    g.style.left = "0px";
-                    level += 1;
-                } else if(size === 2 && lastSize === 1) {
-                    level += 1;
-                    g.style.top = level * gridHeight + (level - 1) * 8 + "px";
-                    g.style.left = "0px";
-                } else if(size === 1 && lastSize === 0) {
-                    lastSize += 1;
-                    g.style.top = level * gridHeight + (level - 1) * 8 + "px";
-                    g.style.left = "0px";
-                } else if(size === 1 && lastSize === 1) {
-                    lastSize = 0;
-                    g.style.top = level * gridHeight + (level - 1) * 8 + "px";
-                    g.style.left = "128px";
-                    level += 1;
-                }
-                temp.addGrid(new _Grid(i));
+                temp_grid = new _Grid(g);
+                temp_grid.setIndex(i);
+                temp_group.addGrid(temp_grid);
             });
-            groups.push(temp);
+            reLayout(temp_group.grids);
+            groups.push(temp_group);
         });
 
     }
     //初始化事件绑定
     function initEvent(){
         var doc = document,
+            each = Array.prototype.forEach,
             group = d.getAll(".group"),
-            global_index,
-            origin;
+            origin,
+            target;
 
         doc.addEventListener("dragstart", dragHandle, false);
         doc.addEventListener("dragenter", dragHandle, false);
@@ -166,19 +129,21 @@ Metro = (function(d){
         doc.addEventListener("dragout", dragHandle, false);
         doc.addEventListener("drop", dragHandle, false);
 
-        function dragHandle(e) {
+        function dragHandle(e){
+            var evta = e.target,
+                evtaClass = evta.className;
             switch (e.type) {
                 case "dragstart":
-                    global_index = e.target.dataset.global_index;
-                    origin = e.target;
+                    //设置当前grid的index和对应group的index
+                    origin = {
+                        groupIndex: +evta.parentNode.dataset.index,
+                        gridIndex: +evta.dataset.index
+                    };
                     e.dataTransfer.effectAllowed = "all";
-                    e.dataTransfer.setData("text", global_index);
-                    [].forEach.call(group, function(obj){
+                    e.dataTransfer.setData("text", null);
+                    each.call(group, function(obj){
                         d.addClass(obj, "actived");
                     });
-                    break;
-                case "dragenter":
-//                    console.log(e.target);
                     break;
                 case "dragover":
                     e.preventDefault();
@@ -186,11 +151,28 @@ Metro = (function(d){
                     break;
                 case "drop":
                     e.preventDefault();
-                    console.log(e.target.dataset.global_index);
-                    gridCollect[e.target.dataset.global_index].update(0, origin.dataset.group_index, e.target.dataset.group_index);
-                    [].forEach.call(group, function(obj){
+                    // 释放时位置元素的index值target
+                    if (evtaClass === "grid") {
+                        target = {
+                            groupIndex: +evta.parentNode.dataset.index,
+                            gridIndex: +evta.dataset.index
+                        };
+                    } else if(evtaClass.indexOf("group") !== -1) {
+                        target = {
+                            groupIndex: +evta.dataset.index,
+                            gridIndex: null
+                        };
+                    } else {
+                        target = null;
+                    }
+                    //位置交换
+                    if (target) {
+                        calc(target, origin)
+                    }
+
+                    each.call(group, function(obj){
                         d.removeClass(obj, "actived");
-                    });
+                    })
                     break;
             }
         }
@@ -199,6 +181,66 @@ Metro = (function(d){
     function _init(){
         layout();
         initEvent();
+    }
+
+    /**
+     * 重新布局
+     * @param gridArray
+     */
+    function reLayout(gridArray){
+        var size,
+            lastSize = 0,
+            level = 0;
+        gridArray.forEach(function(grid, index){
+            size = grid.size;
+            if (size + lastSize > 2) {
+                level += 1;
+                lastSize = 0;
+            }
+            grid.mapping.style.left = lastSize % 2 === 0 ? "0px" : gridMargin + gridWidth + "px";
+            grid.mapping.style.top = level * (gridHeight + gridMargin) + "px";
+            lastSize += size;
+        });
+    }
+    // 比较grid的index
+    function indexComparison(grid1, grid2) {
+        return grid1.index - grid2.index;
+    }
+
+    /**
+     * 计算grid index的位置
+     * @param target
+     * @param origin
+     */
+    function calc(target, origin) {
+        if (target.groupIndex === origin.groupIndex) {
+            if (target.gridIndex === origin.gridIndex) {
+                return;
+            } else if (target.gridIndex) {
+                groups[target.groupIndex].grids.forEach(function(grid, index){
+                    if (target.gridIndex < origin.gridIndex) {
+                        if (index > target.gridIndex && index <= origin.gridIndex) {
+                            grid.setIndex(index - 1);
+                        } else if (index === target.gridIndex) {
+                            grid.setIndex(origin.gridIndex);
+                        }
+                    } else {
+                        if (index >= origin.gridIndex && index < target.gridIndex) {
+                            grid.setIndex(index + 1);
+                        } else if (index === target.gridIndex) {
+                            grid.setIndex(origin.gridIndex);
+                        }
+                    }
+                });
+                //重新排序
+                groups[target.groupIndex].grids.sort(indexComparison);
+                reLayout(groups[target.groupIndex].grids);
+            } else {
+
+            }
+        } else {
+
+        }
     }
 
     return {
